@@ -1,2 +1,1 @@
-# the-grid-tron-pro-
-the grid + trello enhancements 
+# The-Grid-share

@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add these lines inside <head> tag -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4F46E5">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%234F46E5' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3E💵%3C/text%3E%3C/svg%3E">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRON Legacy Productivity Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000810;
+            color: #00d9ff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #00d9ff;
+            text-shadow: 0 0 20px #00d9ff;
+            margin-bottom: 10px;
+        }
+
+        .header .date {
+            color: #0099cc;
+            font-size: 1.1em;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00d9ff;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
+        }
+
+        .card.completed {
+            border-color: #e0f7ff;
+            box-shadow: 0 0 30px rgba(224, 247, 255, 0.6);
+        }
+
+        .card.warning {
+            border-color: #ff8c00;
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.6);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            color: #00d9ff;
+        }
+
+        .card-content {
+            color: #0099cc;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0, 100, 150, 0.1);
+            border-radius: 5px;
+        }
+
+        .task-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .progress-text {
+            color: #00d9ff;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid #00d9ff;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 50px rgba(0, 217, 255, 0.5);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00d9ff;
+            padding-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #00d9ff;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ff8c00;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .close-btn:hover {
+            color: #ff6600;
+        }
+
+        button {
+            background: #00d9ff;
+            color: #000810;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00b8e6;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+        }
+
+        button.delete-btn {
+            background: #ff4444;
+            color: white;
+        }
+
+        button.delete-btn:hover {
+            background: #cc0000;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 50, 80, 0.3);
+            border: 1px solid #00d9ff;
+            border-radius: 5px;
+            color: #00d9ff;
+            margin: 10px 0;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            background: rgba(0, 100, 150, 0.3);
+            border: 1px solid #00d9ff;
+            color: #00d9ff;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .toggle-btn.active {
+            background: #00d9ff;
+            color: #000810;
+        }
+
+        .study-bank {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .study-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 50, 80, 0.2);
+            border: 1px solid #00d9ff;
+            border-radius: 8px;
+        }
+
+        .study-item.active {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: #00d9ff;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #00d9ff;
+            border-radius: 5px;
+            cursor: pointer;
+            background: rgba(0, 50, 80, 0.2);
+        }
+
+        .calendar-day:hover {
+            background: rgba(0, 217, 255, 0.2);
+        }
+
+        .calendar-day.has-event {
+            background: rgba(0, 217, 255, 0.3);
+            border: 2px solid #00d9ff;
+        }
+
+        .calendar-day.due-soon {
+            background: rgba(255, 140, 0, 0.3);
+            border: 2px solid #ff8c00;
+        }
+
+        .subscription-item {
+            padding: 20px;
+            background: rgba(0, 50, 80, 0.2);
+            border: 1px solid #00d9ff;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .subscription-name {
+            font-size: 1.2em;
+            color: #00d9ff;
+            margin-bottom: 5px;
+        }
+
+        .subscription-desc {
+            color: #0099cc;
+            margin-bottom: 10px;
+        }
+
+        .subscription-link {
+            color: #00d9ff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .subscription-link:hover {
+            color: #00b8e6;
+        }
+
+        .add-task-form {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .work-item {
+            padding: 15px;
+            background: rgba(0, 50, 80, 0.2);
+            border: 1px solid #00d9ff;
+            border-radius: 8px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .work-item.active {
+            background: rgba(0, 217, 255, 0.2);
+            border: 2px solid #00d9ff;
+        }
+
+        .bills-list {
+            margin: 20px 0;
+        }
+
+        .bill-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(0, 50, 80, 0.2);
+            border: 1px solid #00d9ff;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .bill-item.due-soon {
+            border-color: #ff8c00;
+            background: rgba(255, 140, 0, 0.1);
+        }
+
+        .email-tasks {
+            display: grid;
+            gap: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Greetings, User</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Daily Focus Card -->
+            <div class="card" onclick="openModal('dailyFocus')">
+                <div class="card-header">
+                    <div class="card-title">Daily Focus</div>
+                </div>
+                <div class="card-content" id="dailyFocusPreview">
+                    <div class="progress-text">Loading tasks...</div>
+                </div>
+            </div>
+
+            <!-- Study & Learning Card -->
+            <div class="card" onclick="openModal('study')">
+                <div class="card-header">
+                    <div class="card-title">Study & Learning</div>
+                </div>
+                <div class="card-content" id="studyPreview">
+                    <div class="progress-text">Active subjects...</div>
+                </div>
+            </div>
+
+            <!-- Subscriptions Card -->
+            <div class="card" onclick="openModal('subscriptions')">
+                <div class="card-header">
+                    <div class="card-title">Subscriptions</div>
+                </div>
+                <div class="card-content" id="subscriptionsPreview">
+                    <div class="progress-text">Tools & Platforms</div>
+                </div>
+            </div>
+
+            <!-- Work & Projects Card -->
+            <div class="card" onclick="openModal('work')">
+                <div class="card-header">
+                    <div class="card-title">Work & Projects</div>
+                </div>
+                <div class="card-content" id="workPreview">
+                    <div class="progress-text">Active projects...</div>
+                </div>
+            </div>
+
+            <!-- Email Card -->
+            <div class="card" onclick="openModal('email')">
+                <div class="card-header">
+                    <div class="card-title">Email</div>
+                </div>
+                <div class="card-content" id="emailPreview">
+                    <div class="progress-text">Email management...</div>
+                </div>
+            </div>
+
+            <!-- Bills & Admin Card -->
+            <div class="card" onclick="openModal('bills')">
+                <div class="card-header">
+                    <div class="card-title">Bills & Admin</div>
+                </div>
+                <div class="card-content" id="billsPreview">
+                    <div class="progress-text">Upcoming bills...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals will be dynamically created -->
+    <div id="modalContainer"></div>
+
+    <script>
+        // Initialize data structure
+        let appData = {
+            dailyFocus: [],
+            study: {
+                math: { active: true, source: 'Khan Academy', tasks: ['Theory', 'Recall', 'Practice'] },
+                languages: { active: true, language: 'Arabic', tasks: ['Duolingo — Daily', 'Mango Languages — Daily'] },
+                aiCourse: { active: true, tasks: ['Theory', 'Recall', 'Practice'] },
+                specialPractice: { active: false, tasks: [] },
+                personalDev: { active: false, tasks: [] },
+                writingAnalysis: { active: false, tasks: [] },
+                finance: { active: false, tasks: [] },
+                law: { active: false, tasks: [] }
+            },
+            subscriptions: [
+                { name: 'Perplexity', desc: 'AI research engine', url: 'https://www.perplexity.ai/', status: 'Active' },
+                { name: 'Facebook Page', desc: 'brand/social presence', url: 'https://www.facebook.com/profile.php?id=61585544618132', status: 'Active' },
+                { name: 'Canva', desc: 'design & content creation', url: 'https://www.canva.com/projects/your-projects', status: 'Active' },
+                { name: 'Julius AI', desc: 'data & analysis assistant', url: 'https://julius.ai/chat?action=modal', status: 'Active' },
+                { name: 'Lovable', desc: 'AI web app builder', url: 'https://lovable.dev', status: 'Active' },
+                { name: 'Lyzr Studio', desc: 'AI agents', url: 'https://studio.lyzr.ai/', status: 'Active' },
+                { name: 'Fireflies', desc: 'meeting transcription', url: 'https://app.fireflies.ai/', status: 'Active' },
+                { name: 'Phot AI', desc: 'background removal & art', url: 'https://www.phot.ai', status: 'Active' },
+                { name: 'Hailuo AI', desc: 'video generation', url: 'https://hailuoai.video/', status: 'Active' },
+                { name: 'Vapi', desc: 'voice AI / agents', url: 'https://dashboard.vapi.ai/overview', status: 'Active' },
+                { name: 'Writesonic', desc: 'AI writing', url: 'https://app.writesonic.com/', status: 'Active' },
+                { name: 'HeyGen', desc: 'AI avatars & video', url: 'https://app.heygen.com/home', status: 'Active' },
+                { name: 'Chronicle', desc: 'docs & presentations', url: 'https://app.chroniclehq.com/', status: 'Active' },
+                { name: 'Happenstance', desc: 'people search', url: 'https://happenstance.ai/search', status: 'Active' },
+                { name: 'MultipleChat', desc: 'multi-LLM interface', url: 'https://multiplechat.ai/', status: 'Active' },
+                { name: 'Wispr Flow', desc: 'speech-to-text', url: 'https://wisprflow.ai/', status: 'Active' },
+                { name: 'Retell AI', desc: 'voice agents', url: 'https://www.retellai.com/', status: 'Active' },
+                { name: 'ElevenLabs', desc: 'voice generation', url: 'https://elevenlabs.io/', status: 'Active' },
+                { name: 'MeetEmily', desc: 'AI assistant', url: 'https://meetemily.ai/', status: 'Active' },
+                { name: 'Bolt', desc: 'AI web app builder', url: 'https://bolt.new/', status: 'Active' },
+                { name: 'LinkedIn', desc: 'professional network', url: 'https://www.linkedin.com/feed/', status: 'Active' },
+                { name: 'OpenAI', desc: 'AI platform', url: 'https://openai.com/', status: 'Active' },
+                { name: 'Pinecone', desc: 'vector database', url: 'https://www.pinecone.io/', status: 'Active' },
+                { name: 'n8n', desc: 'workflow automation', url: 'https://n8n.io/', status: 'Active' },
+                { name: 'Dify', desc: 'AI app orchestration', url: 'https://dify.ai/', status: 'Active' },
+                { name: 'Gumloop', desc: 'automation', url: 'https://www.gumloop.com/', status: 'Active' },
+                { name: 'Google Sheets', desc: 'data logging', url: 'https://workspace.google.com/products/sheets/', status: 'Active' },
+                { name: 'Google Labs', desc: 'experimental AI', url: 'https://labs.google/', status: 'Active' },
+                { name: 'NotebookLM', desc: 'research notebook', url: 'https://notebooklm.google/', status: 'Active' },
+                { name: 'Apify', desc: 'web scraping', url: 'https://apify.com/', status: 'Active' },
+                { name: 'SocialSonic', desc: 'social AI', url: 'https://app.socialsonic.com/', status: 'Active' },
+                { name: 'SuperGrow', desc: 'LinkedIn growth', url: 'https://www.supergrow.ai/', status: 'Active' },
+                { name: 'VTurb', desc: 'video funnels', url: 'https://app.vturb.com/', status: 'Active' },
+                { name: 'Kiwify', desc: 'payments', url: 'https://dashboard.kiwify.com.br/', status: 'Active' },
+                { name: 'GoDaddy', desc: 'domain management', url: 'https://dcc.godaddy.com/', status: 'Active' },
+                { name: 'Hotmart', desc: 'sales platform', url: 'https://app.hotmart.com/', status: 'Active' },
+                { name: 'Atomicat', desc: 'funnels', url: 'https://app.atomicat.com.br/', status: 'Active' },
+                { name: 'Supabase', desc: 'backend & auth (free tier)', url: 'https://supabase.com/dashboard/', status: 'Active' }
+            ],
+            work: {
+                physical: [
+                    { name: 'House Upkeep', tasks: ['Sweep', 'Dishes', 'Deep Clean', 'Clear Surfaces'], active: true },
+                    { name: 'Food & Meals', tasks: ['Food Prep', 'Pantry Check', 'Fridge Cleanout', 'Grocery Planning', 'Grocery Shopping'], active: false },
+                    { name: 'Laundry', tasks: [], active: false },
+                    { name: 'Trash', tasks: [], active: false },
+                    { name: 'Pets', tasks: [], active: false },
+                    { name: 'Errands', tasks: [], active: false },
+                    { name: 'Appointments', tasks: [], active: false },
+                    { name: 'Personal Maintenance', tasks: [], active: false }
+                ],
+                online: [
+                    { name: 'Instagram/TikTok', mode: 'Light Day', tasks: ['Gather photos', 'Compile image', 'Post'], active: true },
+                    { name: 'YouTube', tasks: [], active: false },
+                    { name: 'AI Tools', tasks: [], active: false }
+                ]
+            },
+            email: ['Inbox Zero', 'Review Promo Emails', 'Unsubscribe List', 'Process Important Mail', 'Organize Folders/Labels', 'Clear Archive / Old Threads', 'Run Unsubscribe Sweep'],
+            bills: []
+        };
+
+        // Load from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('tronDashboard');
+            if (saved) {
+                appData = JSON.parse(saved);
+            }
+        }
+
+        // Save to localStorage
+        function saveData() {
+            localStorage.setItem('tronDashboard', JSON.stringify(appData));
+            updatePreviews();
+        }
+
+        // Initialize
+        function init() {
+            loadData();
+            updateDate();
+            updatePreviews();
+        }
+
+        // Update current date
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
+        }
+
+        // Update card previews
+        function updatePreviews() {
+            // Daily Focus
+            const dfPreview = document.getElementById('dailyFocusPreview');
+            if (appData.dailyFocus.length === 0) {
+                dfPreview.innerHTML = '<div class="progress-text">No tasks for today</div>';
+            } else {
+                const completed = appData.dailyFocus.filter(t => t.completed).length;
+                dfPreview.innerHTML = `
+                    ${appData.dailyFocus.slice(0, 3).map(t => `
+                        <div class="task-item">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} disabled>
+                            <span>${t.text}</span>
+                        </div>
+                    `).join('')}
+                    <div class="progress-text">${completed}/${appData.dailyFocus.length} completed</div>
+                `;
+            }
+
+            // Study & Learning
+            const activeSubjects = Object.entries(appData.study).filter(([k, v]) => v.active);
+            document.getElementById('studyPreview').innerHTML = `
+                <div class="progress-text">${activeSubjects.length} active subjects</div>
+            `;
+
+            // Subscriptions
+            const activeSubs = appData.subscriptions.filter(s => s.status === 'Active').length;
+            document.getElementById('subscriptionsPreview').innerHTML = `
+                <div class="progress-text">${activeSubs} active subscriptions</div>
+            `;
+
+            // Work
+            const activeWork = [...appData.work.physical, ...appData.work.online].filter(w => w.active).length;
+            document.getElementById('workPreview').innerHTML = `
+                <div class="progress-text">${activeWork} active projects</div>
+            `;
+
+            // Email
+            document.getElementById('emailPreview').innerHTML = `
+                <div class="progress-text">${appData.email.length} tasks</div>
+            `;
+
+            // Bills
+            const dueSoon = appData.bills.filter(b => !b.completed && isDueSoon(b.dueDate)).length;
+            document.getElementById('billsPreview').innerHTML = `
+                <div class="progress-text">${dueSoon} bills due soon</div>
+            `;
+        }
+
+        function isDueSoon(dateStr) {
+            if (!dateStr) return false;
+            const due = new Date(dateStr);
+            const now = new Date();
+            const diff = Math.floor((due - now) / (1000 * 60 * 60 * 24));
+            return diff >= 0 && diff <= 7;
+        }
+
+        // Open modal
+        function openModal(type) {
+            const container = document.getElementById('modalContainer');
+            let content = '';
+
+            switch(type) {
+                case 'dailyFocus':
+                    content = createDailyFocusModal();
+                    break;
+                case 'study':
+                    content = createStudyModal();
+                    break;
+                case 'subscriptions':
+                    content = createSubscriptionsModal();
+                    break;
+                case 'work':
+                    content = createWorkModal();
+                    break;
+                case 'email':
+                    content = createEmailModal();
+                    break;
+                case 'bills':
+                    content = createBillsModal();
+                    break;
+            }
+
+            container.innerHTML = `
+                <div class="modal active" onclick="if(event.target === this) closeModal()">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        ${content}
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('modalContainer').innerHTML = '';
+        }
+
+        // Daily Focus Modal
+        function createDailyFocusModal() {
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Daily Focus</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div class="date">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                <div style="margin: 20px 0;">
+                    ${appData.dailyFocus.map((task, i) => `
+                        <div class="task-item">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleDailyTask(${i})">
+                            <span style="flex: 1;">${task.text}</span>
+                            <button class="delete-btn" onclick="removeDailyTask(${i})">🗑</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="add-task-form">
+                    <input type="text" id="newDailyTask" placeholder="Add new task..." onkeypress="if(event.key==='Enter') addDailyTask()">
+                    <button onclick="addDailyTask()">+ Add</button>
+                </div>
+            `;
+        }
+
+        function addDailyTask() {
+            const input = document.getElementById('newDailyTask');
+            if (input.value.trim()) {
+                appData.dailyFocus.push({ text: input.value.trim(), completed: false });
+                saveData();
+                openModal('dailyFocus');
+            }
+        }
+
+        function toggleDailyTask(i) {
+            appData.dailyFocus[i].completed = !appData.dailyFocus[i].completed;
+            saveData();
+        }
+
+        function removeDailyTask(i) {
+            appData.dailyFocus.splice(i, 1);
+            saveData();
+            openModal('dailyFocus');
+        }
+
+        // Study Modal
+        function createStudyModal() {
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Study & Learning</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div class="study-bank">
+                    ${Object.entries(appData.study).map(([key, data]) => {
+                        const names = {
+                            math: 'Math',
+                            languages: 'Languages',
+                            aiCourse: 'AI Course',
+                            specialPractice: 'Special Practice',
+                            personalDev: 'Personal Development',
+                            writingAnalysis: 'Writing Analysis',
+                            finance: 'Finance',
+                            law: 'Law'
+                        };
+                        return `
+                            <div class="study-item ${data.active ? 'active' : ''}" onclick="toggleStudySubject('${key}')">
+                                <div>
+                                    <div style="font-size: 1.2em; margin-bottom: 5px;">${names[key]}</div>
+                                    ${data.active ? '<span style="color: #00d9ff;">● Active</span>' : '<span style="color: #666;">○ Inactive</span>'}
+                                </div>
+                                <button onclick="event.stopPropagation(); openStudyDetails('${key}')" style="margin-left: 10px;">Open →</button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function toggleStudySubject(key) {
+            appData.study[key].active = !appData.study[key].active;
+            saveData();
+            openModal('study');
+        }
+
+        function openStudyDetails(key) {
+            const names = {
+                math: 'Math',
+                languages: 'Languages',
+                aiCourse: 'AI Course',
+                specialPractice: 'Special Practice',
+                personalDev: 'Personal Development',
+                writingAnalysis: 'Writing Analysis',
+                finance: 'Finance',
+                law: 'Law'
+            };
+
+            const links = {
+                math: 'https://www.khanacademy.org/math/',
+                languages: 'https://learn.mangolanguages.com/login',
+                aiCourse: 'https://platform.outskill.com/'
+            };
+
+            const data = appData.study[key];
+            const container = document.getElementById('modalContainer');
+            
+            container.innerHTML = `
+                <div class="modal active" onclick="if(event.target === this) openModal('study')">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h2 class="modal-title">${names[key]}</h2>
+                            <button class="close-btn" onclick="openModal('study')">←</button>
+                        </div>
+                        ${links[key] ? `<button onclick="window.open('${links[key]}', '_blank')" style="margin: 10px 0;">Open ${names[key]} →</button>` : ''}
+                        ${key === 'languages' ? `<div style="margin: 15px 0;"><strong>Active Language:</strong> ${data.language || 'Not set'}</div>` : ''}
+                        ${key === 'math' ? `<div style="margin: 15px 0;"><strong>Source:</strong> ${data.source || 'Khan Academy'}</div>` : ''}
+                        <div style="margin: 20px 0;">
+                            ${data.tasks && data.tasks.length > 0 ? data.tasks.map((task, i) => `
+                                <div class="task-item">
+                                    <input type="checkbox">
+                                    <span>${task}</span>
+                                </div>
+                            `).join('') : '<p style="color: #0099cc;">No tasks configured yet.</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Subscriptions Modal
+        function createSubscriptionsModal() {
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Subscriptions</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div style="max-height: 60vh; overflow-y: auto;">
+                    ${appData.subscriptions.map((sub, i) => `
+                        <div class="subscription-item">
+                            <div class="subscription-name">${sub.name}</div>
+                            <div class="subscription-desc">${sub.desc}</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <a href="${sub.url}" target="_blank" class="subscription-link">Open →</a>
+                                <div>
+                                    <button onclick="toggleSubStatus(${i}, 'Active')" style="margin: 0 5px; ${sub.status === 'Active' ? 'background: #00d9ff;' : ''}">Active</button>
+                                    <button onclick="toggleSubStatus(${i}, 'Review')" style="margin: 0 5px; ${sub.status === 'Review' ? 'background: #ff8c00;' : ''}">Review</button>
+                                    <button onclick="toggleSubStatus(${i}, 'Cancel')" style="margin: 0 5px; ${sub.status === 'Cancel' ? 'background: #ff4444;' : ''}">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function toggleSubStatus(i, status) {
+            appData.subscriptions[i].status = status;
+            saveData();
+            openModal('subscriptions');
+        }
+
+        // Work Modal
+        function createWorkModal() {
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Work & Projects</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" onclick="showWorkMode('physical')">Physical</button>
+                    <button class="toggle-btn" onclick="showWorkMode('online')">Online</button>
+                </div>
+                <div id="workModeContent"></div>
+            `;
+        }
+
+        function showWorkMode(mode) {
+            const buttons = document.querySelectorAll('.toggle-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const items = mode === 'physical' ? appData.work.physical : appData.work.online;
+            const content = document.getElementById('workModeContent');
+            
+            content.innerHTML = `
+                <div style="margin: 20px 0;">
+                    ${items.map((item, i) => `
+                        <div class="work-item ${item.active ? 'active' : ''}" onclick="toggleWorkItem('${mode}', ${i})">
+                            <div style="font-size: 1.2em; margin-bottom: 10px;">${item.name}</div>
+                            ${item.active ? '<span style="color: #00d9ff;">● Active</span>' : '<span style="color: #666;">○ Inactive</span>'}
+                            ${item.tasks && item.tasks.length > 0 ? `
+                                <div style="margin-top: 10px;">
+                                    ${item.tasks.map(task => `<div class="task-item"><input type="checkbox"><span>${task}</span></div>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function toggleWorkItem(mode, i) {
+            if (mode === 'physical') {
+                appData.work.physical[i].active = !appData.work.physical[i].active;
+            } else {
+                appData.work.online[i].active = !appData.work.online[i].active;
+            }
+            saveData();
+            showWorkMode(mode);
+        }
+
+        // Email Modal
+        function createEmailModal() {
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Email Management</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <button onclick="window.open('https://mail.google.com', '_blank')" style="margin: 15px 0; width: 100%;">Open Gmail →</button>
+                <div class="email-tasks">
+                    ${appData.email.map((task, i) => `
+                        <div class="task-item">
+                            <input type="checkbox">
+                            <span style="flex: 1;">${task}</span>
+                            <button class="delete-btn" onclick="removeEmailTask(${i})">🗑</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="add-task-form">
+                    <input type="text" id="newEmailTask" placeholder="Add new email task..." onkeypress="if(event.key==='Enter') addEmailTask()">
+                    <button onclick="addEmailTask()">+ Add</button>
+                </div>
+            `;
+        }
+
+        function addEmailTask() {
+            const input = document.getElementById('newEmailTask');
+            if (input.value.trim()) {
+                appData.email.push(input.value.trim());
+                saveData();
+                openModal('email');
+            }
+        }
+
+        function removeEmailTask(i) {
+            appData.email.splice(i, 1);
+            saveData();
+            openModal('email');
+        }
+
+        // Bills Modal
+        function createBillsModal() {
+            const now = new Date();
+            const month = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            return `
+                <div class="modal-header">
+                    <h2 class="modal-title">Bills & Admin</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" onclick="showBillsMode('bills')">Bills</button>
+                    <button class="toggle-btn" onclick="showBillsMode('appointments')">Appointments</button>
+                </div>
+                <div style="text-align: center; margin: 20px 0;">
+                    <h3>${month}</h3>
+                </div>
+                <div class="bills-list">
+                    ${appData.bills.map((bill, i) => `
+                        <div class="bill-item ${isDueSoon(bill.dueDate) && !bill.completed ? 'due-soon' : ''}">
+                            <input type="checkbox" ${bill.completed ? 'checked' : ''} onchange="toggleBill(${i})">
+                            <div style="flex: 1;">
+                                <div style="font-size: 1.1em;">${bill.name}</div>
+                                <div style="color: #0099cc; font-size: 0.9em;">Due: ${bill.dueDate}</div>
+                            </div>
+                            <button class="delete-btn" onclick="removeBill(${i})">🗑</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="add-task-form">
+                    <input type="text" id="newBillName" placeholder="Bill name..." style="flex: 2;">
+                    <input type="date" id="newBillDate" style="flex: 1;">
+                    <button onclick="addBill()">+ Add</button>
+                </div>
+            `;
+        }
+
+        function showBillsMode(mode) {
+            const buttons = document.querySelectorAll('.toggle-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            // Future: filter bills vs appointments
+        }
+
+        function addBill() {
+            const name = document.getElementById('newBillName').value.trim();
+            const date = document.getElementById('newBillDate').value;
+            if (name && date) {
+                appData.bills.push({ name, dueDate: date, completed: false, type: 'bill' });
+                saveData();
+                openModal('bills');
+            }
+        }
+
+        function toggleBill(i) {
+            appData.bills[i].completed = !appData.bills[i].completed;
+            saveData();
+        }
+
+        function removeBill(i) {
+            appData.bills.splice(i, 1);
+            saveData();
+            openModal('bills');
+        }
+
+        // Initialize app
+        init();
+
+        // Auto-save every 30 seconds
+        setInterval(saveData, 30000);
+    </script>
+    <!-- Add this before </body> tag -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(reg => console.log('Service Worker registered', reg))
+    .catch(err => console.log('Service Worker registration failed', err));
+}
+</script>
+</body>
+</html>
