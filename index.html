@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="THE GRID">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/neon/180/00d9ff/disc.png">
     <title>TRON ISO_BUILD</title>
     <style>
         :root {
@@ -12,7 +16,6 @@
             --grid-line: rgba(0, 217, 255, 0.1);
             --danger: #ff4444;
         }
-
         body {
             background-color: var(--dark-bg);
             background-image: 
@@ -24,39 +27,25 @@
             margin: 0; padding: 20px;
             -webkit-tap-highlight-color: transparent;
         }
-
         .container { max-width: 1200px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--neon-blue); padding-bottom: 10px; }
         h1 { margin: 0; text-transform: uppercase; letter-spacing: 3px; color: var(--neon-blue); font-size: 1.5rem; }
-
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-        
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--neon-blue);
-            padding: 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        .card { background: var(--card-bg); border: 1px solid var(--neon-blue); padding: 15px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
         .card:hover { box-shadow: 0 0 15px var(--neon-blue); }
         .card-title { font-weight: bold; margin-bottom: 10px; color: var(--neon-blue); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
-
-        /* Modal Logic */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #0f172a; border: 2px solid var(--neon-blue); width: 95%; max-width: 700px; max-height: 90vh; padding: 20px; border-radius: 8px; overflow-y: auto; position: relative; }
         .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--neon-blue); font-size: 2rem; cursor: pointer; }
-
-        /* UI Elements */
         .task-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 4px; }
         input[type="checkbox"] { scale: 1.3; accent-color: var(--neon-blue); }
         button { background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 8px 12px; cursor: pointer; border-radius: 4px; margin: 2px; }
         button:hover { background: var(--neon-blue); color: black; }
         .delete-btn { border-color: var(--danger); color: var(--danger); }
         input[type="text"], input[type="number"] { background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 4px; margin-top: 5px; }
-        
         .week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .day-box { border: 1px solid #222; padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.2); }
+        .node-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -72,27 +61,22 @@
             <div class="card-title">Daily Focus</div>
             <div id="dailyFocusPreview" class="progress-text">Loading...</div>
         </div>
-
         <div class="card" onclick="openModal('weekly')">
             <div class="card-title">7-Day Protocol</div>
             <div id="weeklyPreview" class="progress-text">View Schedule</div>
         </div>
-
         <div class="card" onclick="openModal('study')">
             <div class="card-title">Study & Learning</div>
             <div id="studyPreview" class="progress-text">Loading...</div>
         </div>
-
         <div class="card" onclick="openModal('workout')">
             <div class="card-title">Workout & Health</div>
             <div id="workoutPreview" class="progress-text">Loading...</div>
         </div>
-
         <div class="card" onclick="openModal('subscriptions')">
             <div class="card-title">Subscriptions</div>
             <div id="subPreview" class="progress-text">Loading...</div>
         </div>
-
         <div class="card" onclick="openModal('finance')">
             <div class="card-title">Finance & Banking</div>
             <div id="financePreview" class="progress-text">Manage Assets</div>
@@ -102,7 +86,7 @@
     <div style="margin-top: 40px; text-align: center; opacity: 0.5;">
         <button onclick="exportData()">💾 EXPORT</button>
         <button onclick="importData()">📂 IMPORT</button>
-        <button class="delete-btn" onclick="if(confirm('Wipe Grid?')) {localStorage.clear(); location.reload();}">☢ WIPE</button>
+        <button class="delete-btn" onclick="wipeGrid()">☢ WIPE</button>
     </div>
 </div>
 
@@ -110,7 +94,12 @@
 
 <script>
     let appData = {
-        dailyFocus: [],
+        dailyFocus: [
+            { text: "Instagram – Light", completed: false },
+            { text: "AI Course – Theory", completed: false },
+            { text: "House Tidy", completed: false },
+            { text: "Pets – Daily", completed: false }
+        ],
         weeklyPlanner: {
             Monday: { tasks: ['Deep Clean', 'Inventory'], completed: [] },
             Tuesday: { tasks: ['Admin Day', 'Filing'], completed: [] },
@@ -118,29 +107,74 @@
             Thursday: { tasks: ['Outreach'], completed: [] },
             Friday: { tasks: ['Backup'], completed: [] },
             Saturday: { tasks: ['Market'], completed: [] },
-            Sunday: { tasks: ['Prep'], completed: [] }
+            Sunday: { tasks: ['Prep & Weekly Reset'], completed: [] }
         },
         study: {
-            math: { active: true, tasks: ['Theory', 'Practice'], completedTasks: [] },
-            ai: { active: true, tasks: ['Prompting', 'LLM Logic'], completedTasks: [] }
+            math: { name: "Mathematics", url: 'https://www.khanacademy.org/math/', tasks: ['Lecture', 'Practice', 'Review'], sessions: ['1.5h Standard', '4h Deep Dive', '30m Khan Sprint'], completedTasks: [] },
+            ai_course: { name: "AI Specialization", url: 'https://platform.outskill.com/', tasks: ['Theory', 'Recall', 'Practice'], sessions: ['1.5h Standard', '4h Default'], completedTasks: [] },
+            languages: { name: "Language Protocol", url: 'https://learn.mangolanguages.com/login', tasks: ['Mango Deep Study', 'Duolingo Discipline'], completedTasks: [] },
+            writing: { name: "Writing Analysis", url: '#', tasks: ['Physical Book', 'PDF Analysis', 'Online Research', 'Practice'], completedTasks: [] }
         },
         workout: {
             waterIntake: 0,
-            dailyroutine: [{ name: 'Push-ups', target: '3x15', completed: false }]
+            dailyroutine: [
+                { name: 'Special Practice: Prep', completed: false },
+                { name: 'Special Practice: Session', completed: false },
+                { name: 'Push-ups (3x15)', completed: false }
+            ]
         },
-        subscriptions: [],
-        finance: { banks: [], bills: [] }
+        subscriptions: [
+            { name: "Perplexity", url: "https://www.perplexity.ai/", price: "0" },
+            { name: "Facebook Page", url: "https://www.facebook.com/profile.php?id=61585544618132", price: "0" },
+            { name: "Canva", url: "https://www.canva.com/projects/your-projects", price: "0" },
+            { name: "Julius AI", url: "https://julius.ai/chat?action=modal", price: "0" },
+            { name: "Lovable", url: "https://lovable.dev", price: "0" },
+            { name: "Lyzr Studio", url: "https://studio.lyzr.ai/", price: "0" },
+            { name: "Fireflies", url: "https://app.fireflies.ai/", price: "0" },
+            { name: "Phot AI", url: "https://www.phot.ai", price: "0" },
+            { name: "Hailuo AI", url: "https://hailuoai.video/", price: "0" },
+            { name: "Vapi", url: "https://dashboard.vapi.ai/overview", price: "0" },
+            { name: "Writesonic", url: "https://app.writesonic.com/", price: "0" },
+            { name: "HeyGen", url: "https://app.heygen.com/home", price: "0" },
+            { name: "Chronicle", url: "https://app.chroniclehq.com/", price: "0" },
+            { name: "Happenstance", url: "https://happenstance.ai/search", price: "0" },
+            { name: "MultipleChat", url: "https://multiplechat.ai/", price: "0" },
+            { name: "Wispr Flow", url: "https://wisprflow.ai/", price: "0" },
+            { name: "Retell AI", url: "https://www.retellai.com/", price: "0" },
+            { name: "ElevenLabs", url: "https://elevenlabs.io/", price: "0" },
+            { name: "MeetEmily", url: "https://meetemily.ai/", price: "0" },
+            { name: "Bolt", url: "https://bolt.new/", price: "0" },
+            { name: "LinkedIn", url: "https://www.linkedin.com/feed/", price: "0" },
+            { name: "OpenAI", url: "https://openai.com/", price: "0" },
+            { name: "Pinecone", url: "https://www.pinecone.io/", price: "0" },
+            { name: "n8n", url: "https://n8n.io/", price: "0" },
+            { name: "Dify", url: "https://dify.ai/", price: "0" },
+            { name: "Gumloop", url: "https://www.gumloop.com/", price: "0" },
+            { name: "Google Sheets", url: "https://workspace.google.com/products/sheets/", price: "0" },
+            { name: "Google Labs", url: "https://labs.google/", price: "0" },
+            { name: "NotebookLM", url: "https://notebooklm.google/", price: "0" },
+            { name: "Apify", url: "https://apify.com/", price: "0" },
+            { name: "SocialSonic", url: "https://app.socialsonic.com/", price: "0" },
+            { name: "SuperGrow", url: "https://www.supergrow.ai/", price: "0" },
+            { name: "VTurb", url: "https://app.vturb.com/", price: "0" },
+            { name: "Kiwify", url: "https://dashboard.kiwify.com.br/", price: "0" },
+            { name: "GoDaddy", url: "https://dcc.godaddy.com/", price: "0" },
+            { name: "Hotmart", url: "https://app.hotmart.com/", price: "0" },
+            { name: "Atomicat", url: "https://app.atomicat.com.br/", price: "0" },
+            { name: "Supabase", url: "https://supabase.com/dashboard/", price: "0" }
+        ],
+        finance: { banks: ['Vault A', 'Vault B'], bills: [] }
     };
 
     function init() {
-        const saved = localStorage.getItem('tronDashboard_v2');
+        const saved = localStorage.getItem('tron_grid_v3');
         if (saved) appData = JSON.parse(saved);
         updateDate();
         updatePreviews();
     }
 
     function saveData() {
-        localStorage.setItem('tronDashboard_v2', JSON.stringify(appData));
+        localStorage.setItem('tron_grid_v3', JSON.stringify(appData));
         updatePreviews();
     }
 
@@ -150,133 +184,128 @@
     }
 
     function updatePreviews() {
-        document.getElementById('dailyFocusPreview').textContent = `${appData.dailyFocus.filter(t=>t.completed).length}/${appData.dailyFocus.length} Active Tasks`;
-        document.getElementById('workoutPreview').textContent = `${appData.workout.dailyroutine.filter(ex=>ex.completed).length} Done | ${appData.workout.waterIntake}L Water`;
-        document.getElementById('subPreview').textContent = `${appData.subscriptions.length} Active Nodes`;
+        document.getElementById('dailyFocusPreview').textContent = `${appData.dailyFocus.filter(t=>t.completed).length}/${appData.dailyFocus.length} Resolved`;
+        document.getElementById('workoutPreview').textContent = `${appData.workout.waterIntake}L Water`;
+        document.getElementById('subPreview').textContent = `${appData.subscriptions.length} Nodes Active`;
+        document.getElementById('studyPreview').textContent = `${Object.keys(appData.study).length} Tracks`;
     }
 
     function openModal(type) {
         const container = document.getElementById('modalContainer');
         let content = '';
-
         switch(type) {
             case 'dailyFocus': content = renderDaily(); break;
             case 'weekly': content = renderWeekly(); break;
+            case 'study': content = renderStudyBank(); break;
             case 'workout': content = renderWorkout(); break;
-            case 'subscriptions': content = renderSubs(); break;
-            case 'study': content = renderStudy(); break;
+            case 'subscriptions': content = renderSubBank(); break;
             case 'finance': content = renderFinance(); break;
         }
-
-        container.innerHTML = `
-            <div class="modal" onclick="if(event.target === this) closeModal()">
-                <div class="modal-content">
-                    <button class="close-btn" onclick="closeModal()">×</button>
-                    ${content}
-                </div>
-            </div>`;
+        container.innerHTML = `<div class="modal" onclick="if(event.target === this) closeModal()"><div class="modal-content"><button class="close-btn" onclick="closeModal()">×</button>${content}</div></div>`;
     }
 
     function closeModal() { document.getElementById('modalContainer').innerHTML = ''; }
 
-    // RENDER FUNCTIONS
     function renderDaily() {
-        return `<h2>Daily Focus</h2>
-        ${appData.dailyFocus.map((t, i) => `
+        return `<h2>Daily Focus</h2>${appData.dailyFocus.map((t,i)=>`
             <div class="task-item">
-                <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="appData.dailyFocus[${i}].completed = !appData.dailyFocus[${i}].completed; saveData();">
+                <input type="checkbox" ${t.completed?'checked':''} onchange="appData.dailyFocus[${i}].completed=!appData.dailyFocus[${i}].completed; saveData();">
                 <span style="flex:1">${t.text}</span>
                 <button class="delete-btn" onclick="appData.dailyFocus.splice(${i},1); saveData(); openModal('dailyFocus')">🗑</button>
             </div>`).join('')}
-        <div style="display:flex; gap:5px; margin-top:15px;">
-            <input type="text" id="newT" style="flex:1" placeholder="New Task...">
-            <button onclick="const v=document.getElementById('newT').value; if(v){appData.dailyFocus.push({text:v,completed:false}); saveData(); openModal('dailyFocus')}">ADD</button>
-        </div>`;
+            <div style="display:flex; gap:10px;"><input type="text" id="nt" placeholder="New Task..."><button onclick="const v=document.getElementById('nt').value; if(v){appData.dailyFocus.push({text:v,completed:false}); saveData(); openModal('dailyFocus')}">ADD</button></div>`;
     }
 
     function renderWeekly() {
-        return `<h2>7-Day Protocol</h2>
-        <div class="week-grid">
+        return `<h2>7-Day Protocol</h2><div class="week-grid">
             ${Object.keys(appData.weeklyPlanner).map(day => `
                 <div class="day-box">
                     <strong style="color:var(--neon-blue)">${day.toUpperCase()}</strong>
-                    ${appData.weeklyPlanner[day].tasks.map((task, i) => `
-                        <div style="font-size:0.8rem; margin-top:5px;">
-                            <input type="checkbox" ${appData.weeklyPlanner[day].completed.includes(i) ? 'checked' : ''} 
-                                   onchange="toggleWeekly('${day}', ${i})"> ${task}
+                    ${appData.weeklyPlanner[day].tasks.map((t, i) => `
+                        <div style="font-size:0.75rem; margin-top:5px;">
+                            <input type="checkbox" ${appData.weeklyPlanner[day].completed.includes(i)?'checked':''} onchange="toggleWeekly('${day}',${i})"> ${t}
                         </div>`).join('')}
                 </div>`).join('')}
         </div>`;
     }
 
-    function toggleWeekly(day, i) {
-        let arr = appData.weeklyPlanner[day].completed;
-        appData.weeklyPlanner[day].completed = arr.includes(i) ? arr.filter(x => x !== i) : [...arr, i];
+    function toggleWeekly(d, i) {
+        let arr = appData.weeklyPlanner[d].completed;
+        appData.weeklyPlanner[d].completed = arr.includes(i)?arr.filter(x=>x!==i):[...arr, i];
         saveData();
     }
 
-    function renderWorkout() {
-        return `<h2>Workout & Health</h2>
-        ${appData.workout.dailyroutine.map((ex, i) => `
-            <div class="task-item">
-                <input type="checkbox" ${ex.completed ? 'checked' : ''} onchange="appData.workout.dailyroutine[${i}].completed = !appData.workout.dailyroutine[${i}].completed; saveData();">
-                <span style="flex:1">${ex.name} (${ex.target})</span>
-                <button class="delete-btn" onclick="appData.workout.dailyroutine.splice(${i},1); saveData(); openModal('workout')">🗑</button>
+    function renderStudyBank() {
+        return `<h2>Study Banks</h2><div class="node-grid">
+            ${Object.entries(appData.study).map(([key, data]) => `
+                <div class="card" onclick="renderStudyNode('${key}')">
+                    <div style="color:var(--neon-blue); font-size:0.8rem;">${data.name.toUpperCase()}</div>
+                    <small>${data.tasks.length} Modules</small>
+                </div>`).join('')}
+        </div>`;
+    }
+
+    function renderStudyNode(key) {
+        const node = appData.study[key];
+        const html = `<button onclick="openModal('study')" style="margin-bottom:15px;">⬅ Back</button>
+            <h2>Node: ${node.name}</h2>
+            ${node.url !== '#' ? `<div class="task-item" onclick="window.open('${node.url}', '_blank')">🌐 Launch Portal</div>` : ''}
+            ${node.tasks.map((t, i) => `<div class="task-item">
+                <input type="checkbox" ${node.completedTasks.includes(i)?'checked':''} onchange="toggleStudyTask('${key}',${i})">
+                <span>${t}</span>
             </div>`).join('')}
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="exN" placeholder="Exercise" style="width:40%">
-            <input type="text" id="exT" placeholder="Target" style="width:40%">
-            <button onclick="addEx()">ADD</button>
-        </div>
-        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+            <h3>Sessions:</h3><small>${node.sessions ? node.sessions.join(' | ') : '1.5h'}</small>`;
+        document.querySelector('.modal-content').innerHTML = `<button class="close-btn" onclick="closeModal()">×</button>` + html;
+    }
+
+    function toggleStudyTask(key, i) {
+        let arr = appData.study[key].completedTasks;
+        appData.study[key].completedTasks = arr.includes(i) ? arr.filter(x=>x!==i) : [...arr, i];
+        saveData();
+    }
+
+    function renderSubBank() {
+        return `<h2>Subscription Bank</h2><div class="node-grid">
+            ${appData.subscriptions.map((s, i) => `
+                <div class="card" onclick="renderSubNode(${i})">
+                    <div style="font-size:0.8rem;">${s.name}</div>
+                    <small style="color:var(--neon-blue)">Link Active</small>
+                </div>`).join('')}
+        </div>`;
+    }
+
+    function renderSubNode(i) {
+        const s = appData.subscriptions[i];
+        const html = `<button onclick="openModal('subscriptions')" style="margin-bottom:15px;">⬅ Back</button>
+            <h2>Program: ${s.name}</h2>
+            <div class="task-item" onclick="window.open('${s.url}', '_blank')">🚀 Launch Service</div>
+            <button class="delete-btn" onclick="appData.subscriptions.splice(${i},1); saveData(); openModal('subscriptions')">Derez Program</button>`;
+        document.querySelector('.modal-content').innerHTML = `<button class="close-btn" onclick="closeModal()">×</button>` + html;
+    }
+
+    function renderWorkout() {
+        return `<h2>Workout</h2>
+        ${appData.workout.dailyroutine.map((ex,i)=>`<div class="task-item">
+            <input type="checkbox" ${ex.completed?'checked':''} onchange="appData.workout.dailyroutine[${i}].completed=!appData.workout.dailyroutine[${i}].completed; saveData();">
+            <span>${ex.name}</span>
+        </div>`).join('')}
         <h3>Water: ${appData.workout.waterIntake}L</h3>
         <button onclick="appData.workout.waterIntake += 0.5; saveData(); openModal('workout')">+ 0.5L</button>
-        <button onclick="appData.workout.waterIntake = 0; saveData(); openModal('workout')">RESET</button>`;
+        <button onclick="appData.workout.waterIntake = 0; saveData(); openModal('workout')">Reset</button>`;
     }
 
-    function addEx() {
-        const n = document.getElementById('exN').value;
-        const t = document.getElementById('exT').value;
-        if(n && t) { appData.workout.dailyroutine.push({name:n, target:t, completed:false}); saveData(); openModal('workout'); }
-    }
+    function renderFinance() { return `<h2>Secure Vault</h2><p>Asset tracking active.</p>`; }
 
-    function renderSubs() {
-        return `<h2>Subscription Node</h2>
-        ${appData.subscriptions.map((s, i) => `
-            <div class="task-item">
-                <span style="flex:1"><b>${s.name}</b> — $${s.price}</span>
-                <button class="delete-btn" onclick="appData.subscriptions.splice(${i},1); saveData(); openModal('subscriptions')">🗑</button>
-            </div>`).join('')}
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="sN" placeholder="Service">
-            <input type="number" id="sP" placeholder="$">
-            <button onclick="const n=document.getElementById('sN').value, p=document.getElementById('sP').value; if(n){appData.subscriptions.push({name:n, price:p}); saveData(); openModal('subscriptions')}">ADD</button>
-        </div>`;
-    }
+    function wipeGrid() { if(confirm("DEREZ ALL DATA?")) { localStorage.removeItem('tron_grid_v3'); location.reload(); } }
 
-    function renderFinance() {
-        return `<h2>Finance & Banking</h2>
-        <p><i>Vault Access Granted</i></p>
-        <div class="day-box">
-            <h4>Bank Accounts</h4>
-            <div id="bankList">${appData.finance.banks.map(b => `<div>• ${b}</div>`).join('')}</div>
-            <input type="text" id="bnkI" placeholder="Bank Name"><button onclick="appData.finance.banks.push(document.getElementById('bnkI').value); saveData(); openModal('finance')">+</button>
-        </div>`;
-    }
-
-    function renderStudy() { return `<h2>Study Node</h2><p>Subject persistence active.</p><button onclick="closeModal()">Return to Grid</button>`; }
-
-    // DATA PORTABILITY
     function exportData() {
         const blob = new Blob([JSON.stringify(appData)], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = 'tron_grid_backup.json'; a.click();
+        a.href = URL.createObjectURL(blob); a.download = 'tron_backup.json'; a.click();
     }
 
     function importData() {
-        const input = document.createElement('input');
-        input.type = 'file';
+        const input = document.createElement('input'); input.type = 'file';
         input.onchange = e => {
             const reader = new FileReader();
             reader.onload = ev => { appData = JSON.parse(ev.target.result); saveData(); location.reload(); };
