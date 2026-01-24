@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRON Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TRON ISO_BUILD</title>
     <style>
         :root {
             --neon-blue: #00d9ff;
@@ -11,7 +11,6 @@
             --card-bg: rgba(16, 18, 27, 0.9);
             --grid-line: rgba(0, 217, 255, 0.1);
             --danger: #ff4444;
-            --success: #00ff88;
         }
 
         body {
@@ -21,414 +20,272 @@
                 linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
             background-size: 30px 30px;
             color: white;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 20px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--neon-blue); padding-bottom: 10px; }
+        h1 { margin: 0; text-transform: uppercase; letter-spacing: 3px; color: var(--neon-blue); font-size: 1.5rem; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--neon-blue);
-            padding-bottom: 10px;
-        }
-
-        h1 { margin: 0; text-transform: uppercase; letter-spacing: 3px; color: var(--neon-blue); }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        
         .card {
             background: var(--card-bg);
             border: 1px solid var(--neon-blue);
-            padding: 20px;
+            padding: 15px;
             border-radius: 4px;
             cursor: pointer;
             transition: 0.3s;
-            position: relative;
-            overflow: hidden;
         }
+        .card:hover { box-shadow: 0 0 15px var(--neon-blue); }
+        .card-title { font-weight: bold; margin-bottom: 10px; color: var(--neon-blue); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
 
-        .card:hover {
-            box-shadow: 0 0 15px var(--neon-blue);
-            background: rgba(0, 217, 255, 0.05);
-        }
+        /* Modal Logic */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #0f172a; border: 2px solid var(--neon-blue); width: 95%; max-width: 700px; max-height: 90vh; padding: 20px; border-radius: 8px; overflow-y: auto; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--neon-blue); font-size: 2rem; cursor: pointer; }
 
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: var(--neon-blue);
-            text-transform: uppercase;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px;
-            border-radius: 4px;
-        }
-
-        input[type="checkbox"] { accent-color: var(--neon-blue); scale: 1.2; }
-
-        .progress-text { color: #888; font-size: 0.85rem; margin-top: 10px; }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: #0f172a;
-            border: 2px solid var(--neon-blue);
-            width: 90%;
-            max-width: 600px;
-            max-height: 85vh;
-            padding: 30px;
-            border-radius: 8px;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 15px;
-            background: none; border: none;
-            color: var(--neon-blue); font-size: 2rem; cursor: pointer;
-        }
-
-        button {
-            background: transparent;
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            padding: 8px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: 0.2s;
-        }
-
+        /* UI Elements */
+        .task-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 4px; }
+        input[type="checkbox"] { scale: 1.3; accent-color: var(--neon-blue); }
+        button { background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 8px 12px; cursor: pointer; border-radius: 4px; margin: 2px; }
         button:hover { background: var(--neon-blue); color: black; }
-
         .delete-btn { border-color: var(--danger); color: var(--danger); }
-        .delete-btn:hover { background: var(--danger); color: white; }
-
-        .add-task-form { display: flex; gap: 10px; margin-top: 20px; }
-        input[type="text"], input[type="date"], input[type="number"] {
-            background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; flex: 1;
-        }
-
-        .kanban-board { display: flex; gap: 15px; }
-        .kanban-column { flex: 1; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; }
+        input[type="text"], input[type="number"] { background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 4px; margin-top: 5px; }
+        
+        .week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .day-box { border: 1px solid #222; padding: 10px; border-radius: 4px; background: rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Greetings, User</h1>
-            <div id="currentDate"></div>
+
+<div class="container">
+    <div class="header">
+        <h1>ISO_BUILD // THE GRID</h1>
+        <div id="currentDate" style="color: var(--neon-blue); font-size: 0.8rem;"></div>
+    </div>
+
+    <div class="cards-grid">
+        <div class="card" onclick="openModal('dailyFocus')">
+            <div class="card-title">Daily Focus</div>
+            <div id="dailyFocusPreview" class="progress-text">Loading...</div>
         </div>
 
-        <div class="cards-grid">
-            <div class="card" onclick="openModal('dailyFocus')">
-                <div class="card-title">Daily Focus</div>
-                <div id="dailyFocusPreview"></div>
-            </div>
-
-            <div class="card" onclick="openModal('study')">
-                <div class="card-title">Study & Learning</div>
-                <div id="studyPreview"></div>
-            </div>
-
-            <div class="card" onclick="openModal('workout')">
-                <div class="card-title">Workout & Health</div>
-                <div id="workoutPreview"></div>
-            </div>
-
-            <div class="card" onclick="openModal('work')">
-                <div class="card-title">Work & Projects</div>
-                <div id="workPreview"></div>
-            </div>
-
-            <div class="card" onclick="openModal('subscriptions')">
-                <div class="card-title">Subscriptions</div>
-                <div id="subscriptionsPreview"></div>
-            </div>
-
-            <div class="card" onclick="openModal('bills')">
-                <div class="card-title">Bills & Admin</div>
-                <div id="billsPreview"></div>
-            </div>
+        <div class="card" onclick="openModal('weekly')">
+            <div class="card-title">7-Day Protocol</div>
+            <div id="weeklyPreview" class="progress-text">View Schedule</div>
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <button onclick="exportData()">💾 Export Backup</button>
-            <button onclick="importData()">📂 Import Backup</button>
+        <div class="card" onclick="openModal('study')">
+            <div class="card-title">Study & Learning</div>
+            <div id="studyPreview" class="progress-text">Loading...</div>
+        </div>
+
+        <div class="card" onclick="openModal('workout')">
+            <div class="card-title">Workout & Health</div>
+            <div id="workoutPreview" class="progress-text">Loading...</div>
+        </div>
+
+        <div class="card" onclick="openModal('subscriptions')">
+            <div class="card-title">Subscriptions</div>
+            <div id="subPreview" class="progress-text">Loading...</div>
+        </div>
+
+        <div class="card" onclick="openModal('finance')">
+            <div class="card-title">Finance & Banking</div>
+            <div id="financePreview" class="progress-text">Manage Assets</div>
         </div>
     </div>
 
-    <div id="modalContainer"></div>
+    <div style="margin-top: 40px; text-align: center; opacity: 0.5;">
+        <button onclick="exportData()">💾 EXPORT</button>
+        <button onclick="importData()">📂 IMPORT</button>
+        <button class="delete-btn" onclick="if(confirm('Wipe Grid?')) {localStorage.clear(); location.reload();}">☢ WIPE</button>
+    </div>
+</div>
 
-    <script>
-        let appData = {
-            dailyFocus: [],
-            study: {
-                math: { active: true, source: 'Khan Academy', tasks: ['Theory', 'Recall', 'Practice'], completedTasks: [] },
-                languages: { active: true, language: 'Arabic', tasks: ['Duolingo — Daily', 'Mango Languages — Daily'], completedTasks: [] },
-                aiCourse: { active: true, tasks: ['Theory', 'Recall', 'Practice'], completedTasks: [] },
-                specialPractice: { active: false, tasks: [], completedTasks: [] },
-                personalDev: { active: false, tasks: [], completedTasks: [] },
-                writingAnalysis: { active: false, tasks: [], completedTasks: [] },
-                finance: { active: false, tasks: [], completedTasks: [] },
-                law: { active: false, tasks: [], completedTasks: [] }
-            },
-            workout: {
-                waterIntake: 0,
-                dailyroutine: [
-                    { name: 'Push-ups', target: '3x15', completed: false },
-                    { name: 'Squats', target: '3x20', completed: false },
-                    { name: 'Plank', target: '60s', completed: false }
-                ]
-            },
-            subscriptions: [
-                { name: 'Perplexity', desc: 'AI research', url: 'https://www.perplexity.ai/', status: 'Active' },
-                { name: 'Canva', desc: 'Design', url: 'https://www.canva.com/', status: 'Active' }
-            ],
-            work: {
-                physical: [{ name: 'House Upkeep', tasks: ['Sweep', 'Dishes'], active: true }],
-                online: [{ name: 'Instagram', tasks: ['Post'], active: true }]
-            },
-            email: [],
-            bills: []
+<div id="modalContainer"></div>
+
+<script>
+    let appData = {
+        dailyFocus: [],
+        weeklyPlanner: {
+            Monday: { tasks: ['Deep Clean', 'Inventory'], completed: [] },
+            Tuesday: { tasks: ['Admin Day', 'Filing'], completed: [] },
+            Wednesday: { tasks: ['Review'], completed: [] },
+            Thursday: { tasks: ['Outreach'], completed: [] },
+            Friday: { tasks: ['Backup'], completed: [] },
+            Saturday: { tasks: ['Market'], completed: [] },
+            Sunday: { tasks: ['Prep'], completed: [] }
+        },
+        study: {
+            math: { active: true, tasks: ['Theory', 'Practice'], completedTasks: [] },
+            ai: { active: true, tasks: ['Prompting', 'LLM Logic'], completedTasks: [] }
+        },
+        workout: {
+            waterIntake: 0,
+            dailyroutine: [{ name: 'Push-ups', target: '3x15', completed: false }]
+        },
+        subscriptions: [],
+        finance: { banks: [], bills: [] }
+    };
+
+    function init() {
+        const saved = localStorage.getItem('tronDashboard_v2');
+        if (saved) appData = JSON.parse(saved);
+        updateDate();
+        updatePreviews();
+    }
+
+    function saveData() {
+        localStorage.setItem('tronDashboard_v2', JSON.stringify(appData));
+        updatePreviews();
+    }
+
+    function updateDate() {
+        const options = { weekday: 'long', month: 'short', day: 'numeric' };
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options).toUpperCase();
+    }
+
+    function updatePreviews() {
+        document.getElementById('dailyFocusPreview').textContent = `${appData.dailyFocus.filter(t=>t.completed).length}/${appData.dailyFocus.length} Active Tasks`;
+        document.getElementById('workoutPreview').textContent = `${appData.workout.dailyroutine.filter(ex=>ex.completed).length} Done | ${appData.workout.waterIntake}L Water`;
+        document.getElementById('subPreview').textContent = `${appData.subscriptions.length} Active Nodes`;
+    }
+
+    function openModal(type) {
+        const container = document.getElementById('modalContainer');
+        let content = '';
+
+        switch(type) {
+            case 'dailyFocus': content = renderDaily(); break;
+            case 'weekly': content = renderWeekly(); break;
+            case 'workout': content = renderWorkout(); break;
+            case 'subscriptions': content = renderSubs(); break;
+            case 'study': content = renderStudy(); break;
+            case 'finance': content = renderFinance(); break;
+        }
+
+        container.innerHTML = `
+            <div class="modal" onclick="if(event.target === this) closeModal()">
+                <div class="modal-content">
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                    ${content}
+                </div>
+            </div>`;
+    }
+
+    function closeModal() { document.getElementById('modalContainer').innerHTML = ''; }
+
+    // RENDER FUNCTIONS
+    function renderDaily() {
+        return `<h2>Daily Focus</h2>
+        ${appData.dailyFocus.map((t, i) => `
+            <div class="task-item">
+                <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="appData.dailyFocus[${i}].completed = !appData.dailyFocus[${i}].completed; saveData();">
+                <span style="flex:1">${t.text}</span>
+                <button class="delete-btn" onclick="appData.dailyFocus.splice(${i},1); saveData(); openModal('dailyFocus')">🗑</button>
+            </div>`).join('')}
+        <div style="display:flex; gap:5px; margin-top:15px;">
+            <input type="text" id="newT" style="flex:1" placeholder="New Task...">
+            <button onclick="const v=document.getElementById('newT').value; if(v){appData.dailyFocus.push({text:v,completed:false}); saveData(); openModal('dailyFocus')}">ADD</button>
+        </div>`;
+    }
+
+    function renderWeekly() {
+        return `<h2>7-Day Protocol</h2>
+        <div class="week-grid">
+            ${Object.keys(appData.weeklyPlanner).map(day => `
+                <div class="day-box">
+                    <strong style="color:var(--neon-blue)">${day.toUpperCase()}</strong>
+                    ${appData.weeklyPlanner[day].tasks.map((task, i) => `
+                        <div style="font-size:0.8rem; margin-top:5px;">
+                            <input type="checkbox" ${appData.weeklyPlanner[day].completed.includes(i) ? 'checked' : ''} 
+                                   onchange="toggleWeekly('${day}', ${i})"> ${task}
+                        </div>`).join('')}
+                </div>`).join('')}
+        </div>`;
+    }
+
+    function toggleWeekly(day, i) {
+        let arr = appData.weeklyPlanner[day].completed;
+        appData.weeklyPlanner[day].completed = arr.includes(i) ? arr.filter(x => x !== i) : [...arr, i];
+        saveData();
+    }
+
+    function renderWorkout() {
+        return `<h2>Workout & Health</h2>
+        ${appData.workout.dailyroutine.map((ex, i) => `
+            <div class="task-item">
+                <input type="checkbox" ${ex.completed ? 'checked' : ''} onchange="appData.workout.dailyroutine[${i}].completed = !appData.workout.dailyroutine[${i}].completed; saveData();">
+                <span style="flex:1">${ex.name} (${ex.target})</span>
+                <button class="delete-btn" onclick="appData.workout.dailyroutine.splice(${i},1); saveData(); openModal('workout')">🗑</button>
+            </div>`).join('')}
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="exN" placeholder="Exercise" style="width:40%">
+            <input type="text" id="exT" placeholder="Target" style="width:40%">
+            <button onclick="addEx()">ADD</button>
+        </div>
+        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+        <h3>Water: ${appData.workout.waterIntake}L</h3>
+        <button onclick="appData.workout.waterIntake += 0.5; saveData(); openModal('workout')">+ 0.5L</button>
+        <button onclick="appData.workout.waterIntake = 0; saveData(); openModal('workout')">RESET</button>`;
+    }
+
+    function addEx() {
+        const n = document.getElementById('exN').value;
+        const t = document.getElementById('exT').value;
+        if(n && t) { appData.workout.dailyroutine.push({name:n, target:t, completed:false}); saveData(); openModal('workout'); }
+    }
+
+    function renderSubs() {
+        return `<h2>Subscription Node</h2>
+        ${appData.subscriptions.map((s, i) => `
+            <div class="task-item">
+                <span style="flex:1"><b>${s.name}</b> — $${s.price}</span>
+                <button class="delete-btn" onclick="appData.subscriptions.splice(${i},1); saveData(); openModal('subscriptions')">🗑</button>
+            </div>`).join('')}
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="sN" placeholder="Service">
+            <input type="number" id="sP" placeholder="$">
+            <button onclick="const n=document.getElementById('sN').value, p=document.getElementById('sP').value; if(n){appData.subscriptions.push({name:n, price:p}); saveData(); openModal('subscriptions')}">ADD</button>
+        </div>`;
+    }
+
+    function renderFinance() {
+        return `<h2>Finance & Banking</h2>
+        <p><i>Vault Access Granted</i></p>
+        <div class="day-box">
+            <h4>Bank Accounts</h4>
+            <div id="bankList">${appData.finance.banks.map(b => `<div>• ${b}</div>`).join('')}</div>
+            <input type="text" id="bnkI" placeholder="Bank Name"><button onclick="appData.finance.banks.push(document.getElementById('bnkI').value); saveData(); openModal('finance')">+</button>
+        </div>`;
+    }
+
+    function renderStudy() { return `<h2>Study Node</h2><p>Subject persistence active.</p><button onclick="closeModal()">Return to Grid</button>`; }
+
+    // DATA PORTABILITY
+    function exportData() {
+        const blob = new Blob([JSON.stringify(appData)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'tron_grid_backup.json'; a.click();
+    }
+
+    function importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = e => {
+            const reader = new FileReader();
+            reader.onload = ev => { appData = JSON.parse(ev.target.result); saveData(); location.reload(); };
+            reader.readAsText(e.target.files[0]);
         };
+        input.click();
+    }
 
-        function init() {
-            const saved = localStorage.getItem('tronDashboard');
-            if (saved) appData = JSON.parse(saved);
-            updateDate();
-            updatePreviews();
-        }
-
-        function saveData() {
-            localStorage.setItem('tronDashboard', JSON.stringify(appData));
-            updatePreviews();
-        }
-
-        function updateDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
-        }
-
-        function updatePreviews() {
-            // Daily Focus
-            const dfDone = appData.dailyFocus.filter(t => t.completed).length;
-            document.getElementById('dailyFocusPreview').innerHTML = `<div class="progress-text">${dfDone}/${appData.dailyFocus.length} Completed</div>`;
-
-            // Study
-            const activeSubjects = Object.entries(appData.study).filter(([k, v]) => v.active).length;
-            document.getElementById('studyPreview').innerHTML = `<div class="progress-text">${activeSubjects} Subjects Active</div>`;
-
-            // Workout
-            const workoutDone = appData.workout.dailyroutine.filter(ex => ex.completed).length;
-            document.getElementById('workoutPreview').innerHTML = `
-                <div class="progress-text">${workoutDone}/${appData.workout.dailyroutine.length} Exercises Done</div>
-                <div class="progress-text">Water: ${appData.workout.waterIntake}L</div>
-            `;
-
-            // Work
-            const activeWork = [...appData.work.physical, ...appData.work.online].filter(w => w.active).length;
-            document.getElementById('workPreview').innerHTML = `<div class="progress-text">${activeWork} Projects Running</div>`;
-
-            // Subs
-            document.getElementById('subscriptionsPreview').innerHTML = `<div class="progress-text">${appData.subscriptions.length} Tools Tracked</div>`;
-
-            // Bills
-            document.getElementById('billsPreview').innerHTML = `<div class="progress-text">${appData.bills.length} Records</div>`;
-        }
-
-        function openModal(type) {
-            const container = document.getElementById('modalContainer');
-            let content = '';
-
-            switch(type) {
-                case 'dailyFocus': content = createDailyFocusModal(); break;
-                case 'study': content = createStudyModal(); break;
-                case 'workout': content = createWorkoutModal(); break;
-                case 'work': content = createWorkModal(); break;
-                case 'subscriptions': content = createSubscriptionsModal(); break;
-                case 'bills': content = createBillsModal(); break;
-            }
-
-            container.innerHTML = `
-                <div class="modal" onclick="if(event.target === this) closeModal()">
-                    <div class="modal-content">
-                        <button class="close-btn" onclick="closeModal()">×</button>
-                        ${content}
-                    </div>
-                </div>
-            `;
-        }
-
-        function closeModal() { document.getElementById('modalContainer').innerHTML = ''; }
-
-        // WORKOUT LOGIC
-        function createWorkoutModal() {
-            return `
-                <h2 class="card-title">Workout & Health</h2>
-                <div style="margin-bottom: 20px;">
-                    <h3>Daily Routine</h3>
-                    ${appData.workout.dailyroutine.map((ex, i) => `
-                        <div class="task-item">
-                            <input type="checkbox" ${ex.completed ? 'checked' : ''} onchange="toggleWorkout(${i})">
-                            <span style="flex:1">${ex.name} (${ex.target})</span>
-                        </div>
-                    `).join('')}
-                </div>
-                <div style="border-top: 1px solid #333; padding-top: 15px;">
-                    <h3>Hydration: ${appData.workout.waterIntake}L</h3>
-                    <button onclick="updateWater(0.5)">+ 0.5L</button>
-                    <button onclick="updateWater(-0.5)">- 0.5L</button>
-                    <button class="delete-btn" style="float:right" onclick="resetWorkout()">Reset Day</button>
-                </div>
-            `;
-        }
-
-        function toggleWorkout(i) {
-            appData.workout.dailyroutine[i].completed = !appData.workout.dailyroutine[i].completed;
-            saveData();
-        }
-
-        function updateWater(v) {
-            appData.workout.waterIntake = Math.max(0, appData.workout.waterIntake + v);
-            saveData();
-            openModal('workout');
-        }
-
-        function resetWorkout() {
-            appData.workout.dailyroutine.forEach(ex => ex.completed = false);
-            appData.workout.waterIntake = 0;
-            saveData();
-            openModal('workout');
-        }
-
-        // STUDY LOGIC (With Persistence Fix)
-        function createStudyModal() {
-            return `
-                <h2 class="card-title">Study & Learning</h2>
-                <div class="cards-grid" style="grid-template-columns: 1fr 1fr;">
-                    ${Object.entries(appData.study).map(([key, data]) => `
-                        <div class="card" style="border-color: ${data.active ? 'var(--neon-blue)' : '#333'}" onclick="toggleStudySubject('${key}')">
-                            ${key.toUpperCase()} <br>
-                            <small>${data.active ? 'ACTIVE' : 'OFF'}</small>
-                            <button onclick="event.stopPropagation(); openStudyDetails('${key}')">Open</button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function openStudyDetails(key) {
-            const data = appData.study[key];
-            const content = `
-                <h2>${key.toUpperCase()}</h2>
-                <div style="margin-bottom:20px;">
-                ${data.tasks.map((task, i) => {
-                    const isDone = data.completedTasks && data.completedTasks.includes(i);
-                    return `
-                        <div class="task-item">
-                            <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleStudyTask('${key}', ${i})">
-                            <span>${task}</span>
-                        </div>
-                    `;
-                }).join('')}
-                </div>
-                <button onclick="openModal('study')">← Back</button>
-            `;
-            document.querySelector('.modal-content').innerHTML = `<button class="close-btn" onclick="closeModal()">×</button>` + content;
-        }
-
-        function toggleStudyTask(key, i) {
-            if (!appData.study[key].completedTasks) appData.study[key].completedTasks = [];
-            const idx = appData.study[key].completedTasks.indexOf(i);
-            if (idx > -1) appData.study[key].completedTasks.splice(idx, 1);
-            else appData.study[key].completedTasks.push(i);
-            saveData();
-        }
-
-        function toggleStudySubject(key) {
-            appData.study[key].active = !appData.study[key].active;
-            saveData();
-            openModal('study');
-        }
-
-        // DAILY FOCUS LOGIC
-        function createDailyFocusModal() {
-            return `
-                <h2 class="card-title">Daily Focus</h2>
-                ${appData.dailyFocus.map((t, i) => `
-                    <div class="task-item">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="appData.dailyFocus[${i}].completed = !appData.dailyFocus[${i}].completed; saveData();">
-                        <span style="flex:1">${t.text}</span>
-                        <button class="delete-btn" onclick="appData.dailyFocus.splice(${i},1); saveData(); openModal('dailyFocus')">🗑</button>
-                    </div>
-                `).join('')}
-                <div class="add-task-form">
-                    <input type="text" id="newTask" placeholder="Add task...">
-                    <button onclick="const v=document.getElementById('newTask').value; if(v){appData.dailyFocus.push({text:v,completed:false}); saveData(); openModal('dailyFocus')}">Add</button>
-                </div>
-            `;
-        }
-
-        // SUBS & BILLS & WORK (Placeholders for core logic)
-        function createSubscriptionsModal() { 
-            return `<h2>Subscriptions</h2>` + appData.subscriptions.map(s => `<div class="task-item"><b>${s.name}</b>: ${s.desc}</div>`).join(''); 
-        }
-
-        function createWorkModal() { return `<h2>Work</h2><p>Kanban Logic Active</p>`; }
-        
-        function createBillsModal() { return `<h2>Bills & Admin</h2><p>Tracking Active</p>`; }
-
-        // DATA PORTABILITY
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "tron_backup.json");
-            dlAnchorElem.click();
-        }
-
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = readerEvent => {
-                    appData = JSON.parse(readerEvent.target.result);
-                    saveData();
-                    location.reload();
-                }
-                reader.readAsText(file);
-            }
-            input.click();
-        }
-
-        init();
-    </script>
+    init();
+</script>
 </body>
 </html>
