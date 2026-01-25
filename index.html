@@ -7,105 +7,111 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="THE GRID">
     <link rel="apple-touch-icon" href="https://img.icons8.com/neon/180/00d9ff/disc.png">
-    <title>TRON ISO_BUILD V5</title>
+    <link rel="apple-touch-startup-image" href="https://img.icons8.com/neon/600/00d9ff/disc.png">
+    <title>TRON ISO_BUILD V6.0</title>
     <style>
         :root {
             --neon-blue: #00d9ff;
-            --dark-bg: #0a0b10;
-            --card-bg: rgba(16, 18, 27, 0.9);
-            --grid-line: rgba(0, 217, 255, 0.1);
+            --dark-bg: #050608;
+            --card-bg: rgba(10, 12, 18, 0.95);
+            --grid-line: rgba(0, 217, 255, 0.08);
             --danger: #ff4444;
+            --scanline-color: rgba(0, 217, 255, 0.03);
         }
 
+        /* ========== SCANLINE ANIMATIONS ========== */
+        body::before {
+            content: " "; display: block; position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(var(--scanline-color) 50%, rgba(0, 0, 0, 0) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            z-index: 9999; background-size: 100% 4px, 3px 100%; pointer-events: none;
+        }
+
+        @keyframes scanlineMove { 0% { transform: translateY(0); } 100% { transform: translateY(100vh); } }
+        body::after {
+            content: ""; position: fixed; top: -100px; left: 0; width: 100%; height: 100px;
+            background: rgba(0, 217, 255, 0.05); animation: scanlineMove 8s linear infinite;
+            z-index: 10000; pointer-events: none;
+        }
+
+        /* ========== BASE LAYOUT ========== */
         body {
             background-color: var(--dark-bg);
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 30px 30px;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0; padding: 20px;
-            -webkit-tap-highlight-color: transparent;
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px; color: white; font-family: 'Segoe UI', 'Courier New', monospace;
+            margin: 0; padding: 20px; overflow-x: hidden; -webkit-tap-highlight-color: transparent;
         }
 
         .container { max-width: 1200px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--neon-blue); padding-bottom: 10px; }
-        h1 { margin: 0; text-transform: uppercase; letter-spacing: 3px; color: var(--neon-blue); font-size: 1.5rem; }
+        h1 { margin: 0; text-transform: uppercase; letter-spacing: 3px; color: var(--neon-blue); font-size: 1.5rem; text-shadow: 0 0 10px var(--neon-blue); animation: glitch 5s infinite; }
 
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-        
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--neon-blue);
-            padding: 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.3s;
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px var(--danger), -2px -2px var(--neon-blue); }
+            2% { text-shadow: -2px 2px var(--danger), 2px -2px var(--neon-blue); }
+            4% { text-shadow: 2px 2px var(--danger), -2px -2px var(--neon-blue); }
+            5% { text-shadow: 0 0 10px var(--neon-blue); }
         }
-        .card:hover { box-shadow: 0 0 15px var(--neon-blue); }
-        .card-title { font-weight: bold; margin-bottom: 10px; color: var(--neon-blue); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
 
-        /* Modal Layout */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #0f172a; border: 2px solid var(--neon-blue); width: 95%; max-width: 700px; max-height: 90vh; padding: 20px; border-radius: 8px; overflow-y: auto; position: relative; }
-        .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--neon-blue); font-size: 2rem; cursor: pointer; z-index: 10;}
+        /* ========== CARDS ========== */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .card { background: var(--card-bg); border: 1px solid var(--neon-blue); padding: 15px; border-radius: 2px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.3s; }
+        .card:hover { box-shadow: 0 0 15px var(--neon-blue); transform: translateY(-2px); }
+        .card.active-focus { animation: focusPulse 4s infinite ease-in-out; }
+        @keyframes focusPulse { 0%, 100% { box-shadow: 0 0 5px var(--neon-blue); } 50% { box-shadow: 0 0 25px var(--neon-blue); } }
 
-        /* UI Elements */
-        .task-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 4px; }
-        input[type="checkbox"] { scale: 1.3; accent-color: var(--neon-blue); }
-        button { background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 8px 12px; cursor: pointer; border-radius: 4px; margin: 2px; text-transform: uppercase; font-size: 0.7rem; font-weight: bold;}
+        /* ========== MODAL & UI ========== */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 100000; }
+        .modal-content { background: var(--card-bg); border: 2px solid var(--neon-blue); width: 95%; max-width: 700px; max-height: 90vh; padding: 20px; border-radius: 8px; overflow-y: auto; position: relative; }
+        .task-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 4px; border-left: 2px solid transparent; }
+        .task-item.compiling { animation: compile 0.6s infinite; }
+        @keyframes compile { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        button { background: rgba(0, 217, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.7rem; }
         button:hover { background: var(--neon-blue); color: black; }
         .delete-btn { border-color: var(--danger); color: var(--danger); }
-        
-        input[type="text"] { background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 4px; }
-
-        .day-box { border-left: 3px solid var(--neon-blue); padding: 12px; background: rgba(0,217,255,0.03); margin-bottom: 10px; border-radius: 0 4px 4px 0; }
-        .node-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .node-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        @media (max-width: 600px) { .node-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>ISO_BUILD // V5.0</h1>
-        <div id="currentDate" style="color: var(--neon-blue); font-size: 0.8rem;"></div>
+        <h1>THE_GRID // V6.0</h1>
+        <div id="currentDate" style="color: var(--neon-blue); font-size: 0.8rem;">BOOTING...</div>
     </div>
 
     <div class="cards-grid">
-        <div class="card" onclick="openModal('dailyFocus')">
-            <div class="card-title">Daily Focus</div>
-            <div id="dailyPreview">0 Active Tasks</div>
+        <div class="card active-focus" onclick="openModal('dailyFocus')">
+            <div style="color:var(--neon-blue); font-size:0.8rem; font-weight:bold;">DAILY FOCUS</div>
+            <div id="dailyPreview">0 ACTIVE NODES</div>
         </div>
-
         <div class="card" onclick="openModal('taskBank')">
-            <div class="card-title">The Armory (Bank)</div>
-            <div>Inject Tasks & Chores</div>
+            <div style="color:var(--neon-blue); font-size:0.8rem; font-weight:bold;">ARMORY</div>
+            <div>INJECT TEMPLATES</div>
         </div>
-
         <div class="card" onclick="openModal('weekly')">
-            <div class="card-title">7-Day Protocol</div>
-            <div id="weeklyPreview">View Flight Plan</div>
+            <div style="color:var(--neon-blue); font-size:0.8rem; font-weight:bold;">7-DAY PROTOCOL</div>
+            <div id="weeklyPreview">FLIGHT PLAN</div>
         </div>
-
         <div class="card" onclick="openModal('study')">
-            <div class="card-title">Study Banks</div>
-            <div id="studyPreview">4 Active Tracks</div>
+            <div style="color:var(--neon-blue); font-size:0.8rem; font-weight:bold;">STUDY NODES</div>
+            <div id="studyPreview">4 TRACKS</div>
         </div>
-
         <div class="card" onclick="openModal('workout')">
-            <div class="card-title">Health & Water</div>
-            <div id="workoutPreview">0L Water</div>
+            <div style="color:var(--neon-blue); font-size:0.8rem; font-weight:bold;">HEALTH</div>
+            <div id="workoutPreview">0L</div>
         </div>
-
         <div class="card" onclick="openModal('subscriptions')">
-            <div class="card-title">Sub Nodes</div>
-            <div id="subPreview">38 Program Links</div>
+            <div style="color:var(--neon-blue); font-size:0.8rem; font-weight:bold;">SUBSCRIPTIONS</div>
+            <div id="subPreview">38 TOOLS</div>
         </div>
     </div>
 
-    <div style="margin-top: 40px; text-align: center; opacity: 0.3;">
+    <div style="text-align:center; margin-top:40px; opacity:0.4;">
         <button class="delete-btn" onclick="wipeGrid()">☢ DEREZ SYSTEM</button>
+        <div style="margin-top:10px; font-size:0.7rem; color:var(--neon-blue);">GRID SYNC: <span id="syncStatus">ACTIVE</span></div>
     </div>
 </div>
 
@@ -129,179 +135,115 @@
             SUN: { mission: "Gym (Pilates) + Job/Grant Apps", length: "2 Hours", userInput: "Target List" }
         },
         study: {
-            math: { name: "Mathematics", url: 'https://www.khanacademy.org/math/', tasks: ['Lecture', 'Practice', 'Review'], completedTasks: [] },
-            ai_course: { name: "AI Specialization", url: 'https://platform.outskill.com/', tasks: ['Theory', 'Recall', 'Practice'], completedTasks: [] },
-            languages: { name: "Language Protocol", url: 'https://learn.mangolanguages.com/login', tasks: ['Mango Study', 'Duolingo'], completedTasks: [] },
-            writing: { name: "Writing Analysis", url: '#', tasks: ['Research', 'Practice'], completedTasks: [] }
+            math: { name: "Mathematics", url: 'https://www.khanacademy.org/math/' },
+            ai_course: { name: "AI Specialization", url: 'https://platform.outskill.com/' },
+            languages: { name: "Language Protocol", url: 'https://learn.mangolanguages.com/login' },
+            writing: { name: "Writing Analysis", url: '#' }
         },
         workout: { waterIntake: 0, dailyroutine: [{name: 'Push-ups (3x15)', completed: false}] },
         subscriptions: [
-            { name: "Perplexity", url: "https://www.perplexity.ai/" },
-            { name: "Canva", url: "https://www.canva.com/" },
-            { name: "Julius AI", url: "https://julius.ai/" },
-            { name: "Lovable", url: "https://lovable.dev" },
-            { name: "Lyzr Studio", url: "https://studio.lyzr.ai/" },
-            { name: "Fireflies", url: "https://app.fireflies.ai/" },
-            { name: "Phot AI", url: "https://www.phot.ai" },
-            { name: "Hailuo AI", url: "https://hailuoai.video/" },
-            { name: "Vapi", url: "https://dashboard.vapi.ai/" },
-            { name: "Writesonic", url: "https://app.writesonic.com/" },
-            { name: "HeyGen", url: "https://app.heygen.com/" },
-            { name: "Chronicle", url: "https://app.chroniclehq.com/" },
-            { name: "Happenstance", url: "https://happenstance.ai/" },
-            { name: "MultipleChat", url: "https://multiplechat.ai/" },
-            { name: "Wispr Flow", url: "https://wisprflow.ai/" },
-            { name: "Retell AI", url: "https://www.retellai.com/" },
-            { name: "ElevenLabs", url: "https://elevenlabs.io/" },
-            { name: "MeetEmily", url: "https://meetemily.ai/" },
-            { name: "Bolt", url: "https://bolt.new/" },
-            { name: "LinkedIn", url: "https://www.linkedin.com/" },
-            { name: "OpenAI", url: "https://openai.com/" },
-            { name: "Pinecone", url: "https://www.pinecone.io/" },
-            { name: "n8n", url: "https://n8n.io/" },
-            { name: "Dify", url: "https://dify.ai/" },
-            { name: "Gumloop", url: "https://www.gumloop.com/" },
-            { name: "Google Sheets", url: "https://docs.google.com/spreadsheets" },
-            { name: "Google Labs", url: "https://labs.google/" },
-            { name: "NotebookLM", url: "https://notebooklm.google/" },
-            { name: "Apify", url: "https://apify.com/" },
-            { name: "SocialSonic", url: "https://app.socialsonic.com/" },
-            { name: "SuperGrow", url: "https://www.supergrow.ai/" },
-            { name: "VTurb", url: "https://app.vturb.com/" },
-            { name: "Kiwify", url: "https://dashboard.kiwify.com.br/" },
-            { name: "GoDaddy", url: "https://dcc.godaddy.com/" },
-            { name: "Hotmart", url: "https://app.hotmart.com/" },
-            { name: "Atomicat", url: "https://app.atomicat.com.br/" },
-            { name: "Supabase", url: "https://supabase.com/dashboard/" },
-            { name: "Facebook", url: "https://www.facebook.com/" }
+            { name: "Perplexity", url: "https://www.perplexity.ai/" }, { name: "Canva", url: "https://www.canva.com/" },
+            { name: "Julius AI", url: "https://julius.ai/" }, { name: "Lovable", url: "https://lovable.dev" },
+            { name: "Lyzr Studio", url: "https://studio.lyzr.ai/" }, { name: "Fireflies", url: "https://app.fireflies.ai/" },
+            { name: "Phot AI", url: "https://www.phot.ai" }, { name: "Hailuo AI", url: "https://hailuoai.video/" },
+            { name: "Vapi", url: "https://dashboard.vapi.ai/" }, { name: "Writesonic", url: "https://app.writesonic.com/" },
+            { name: "HeyGen", url: "https://app.heygen.com/" }, { name: "Chronicle", url: "https://app.chroniclehq.com/" },
+            { name: "Happenstance", url: "https://happenstance.ai/" }, { name: "MultipleChat", url: "https://multiplechat.ai/" },
+            { name: "Wispr Flow", url: "https://wisprflow.ai/" }, { name: "Retell AI", url: "https://www.retellai.com/" },
+            { name: "ElevenLabs", url: "https://elevenlabs.io/" }, { name: "MeetEmily", url: "https://meetemily.ai/" },
+            { name: "Bolt", url: "https://bolt.new/" }, { name: "LinkedIn", url: "https://www.linkedin.com/" },
+            { name: "OpenAI", url: "https://openai.com/" }, { name: "Pinecone", url: "https://www.pinecone.io/" },
+            { name: "n8n", url: "https://n8n.io/" }, { name: "Dify", url: "https://dify.ai/" },
+            { name: "Gumloop", url: "https://www.gumloop.com/" }, { name: "Google Sheets", url: "https://docs.google.com/spreadsheets" },
+            { name: "Google Labs", url: "https://labs.google/" }, { name: "NotebookLM", url: "https://notebooklm.google/" },
+            { name: "Apify", url: "https://apify.com/" }, { name: "SocialSonic", url: "https://app.socialsonic.com/" },
+            { name: "SuperGrow", url: "https://www.supergrow.ai/" }, { name: "VTurb", url: "https://app.vturb.com/" },
+            { name: "Kiwify", url: "https://dashboard.kiwify.com.br/" }, { name: "GoDaddy", url: "https://dcc.godaddy.com/" },
+            { name: "Hotmart", url: "https://app.hotmart.com/" }, { name: "Atomicat", url: "https://app.atomicat.com.br/" },
+            { name: "Supabase", url: "https://supabase.com/dashboard/" }, { name: "Facebook", url: "https://www.facebook.com/" }
         ]
     };
 
     function init() {
-        const saved = localStorage.getItem('tron_grid_v5');
-        if (saved) appData = JSON.parse(saved);
-        updateDate();
-        updatePreviews();
+        const saved = localStorage.getItem('tron_grid_v6');
+        if (saved) { try { appData = JSON.parse(saved); document.getElementById('syncStatus').textContent = 'SYNCED'; } catch(e) { document.getElementById('syncStatus').textContent = 'ERROR'; } }
+        updateDate(); updatePreviews();
     }
 
-    function saveData() {
-        localStorage.setItem('tron_grid_v5', JSON.stringify(appData));
-        updatePreviews();
-    }
+    function saveData() { localStorage.setItem('tron_grid_v6', JSON.stringify(appData)); updatePreviews(); document.getElementById('syncStatus').textContent = 'SYNCED'; }
 
-    function updateDate() {
-        const options = { weekday: 'long', month: 'short', day: 'numeric' };
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options).toUpperCase();
-    }
+    function updateDate() { const o = { weekday: 'long', month: 'short', day: 'numeric' }; document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', o).toUpperCase(); }
 
     function updatePreviews() {
-        document.getElementById('dailyPreview').textContent = `${appData.dailyFocus.length} Active Tasks`;
-        document.getElementById('workoutPreview').textContent = `${appData.workout.waterIntake}L Water`;
-        document.getElementById('studyPreview').textContent = `${Object.keys(appData.study).length} Tracks Operational`;
+        document.getElementById('dailyPreview').textContent = `${appData.dailyFocus.filter(t=>!t.completed).length} ACTIVE NODES`;
+        document.getElementById('workoutPreview').textContent = `${appData.workout.waterIntake}L`;
     }
 
     function openModal(type) {
         const container = document.getElementById('modalContainer');
         let content = '';
-        switch(type) {
-            case 'dailyFocus': content = renderDaily(); break;
-            case 'taskBank': content = renderBank(); break;
-            case 'weekly': content = renderWeekly(); break;
-            case 'study': content = renderStudyBank(); break;
-            case 'workout': content = renderWorkout(); break;
-            case 'subscriptions': content = renderSubBank(); break;
-        }
-        container.innerHTML = `<div class="modal" onclick="if(event.target === this) closeModal()"><div class="modal-content"><button class="close-btn" onclick="closeModal()">×</button>${content}</div></div>`;
+        if(type==='dailyFocus') content = renderDaily();
+        else if(type==='taskBank') content = renderBank();
+        else if(type==='weekly') content = renderWeekly();
+        else if(type==='study') content = renderStudyBank();
+        else if(type==='workout') content = renderWorkout();
+        else if(type==='subscriptions') content = renderSubBank();
+        container.innerHTML = `<div class="modal" onclick="if(event.target === this) closeModal()"><div class="modal-content"><button style="float:right" onclick="closeModal()">×</button>${content}</div></div>`;
     }
 
     function closeModal() { document.getElementById('modalContainer').innerHTML = ''; }
 
+    function injectToDaily(name) {
+        const id = Date.now();
+        appData.dailyFocus.push({ id, text: "⚡ COMPILING...", completed: false, isCompiling: true });
+        saveData(); openModal('dailyFocus');
+        setTimeout(() => {
+            const t = appData.dailyFocus.find(x => x.id === id);
+            if(t) { t.text = name; t.isCompiling = false; }
+            saveData(); openModal('dailyFocus');
+        }, 600);
+    }
+
     function renderDaily() {
-        return `<h2>Daily Focus</h2>
-            ${appData.dailyFocus.map((t,i)=>`
-                <div class="task-item">
-                    <input type="checkbox" ${t.completed?'checked':''} onchange="appData.dailyFocus[${i}].completed=!appData.dailyFocus[${i}].completed; saveData();">
-                    <span style="flex:1; ${t.completed?'text-decoration:line-through; opacity:0.5':''}">${t.text}</span>
-                    <button class="delete-btn" onclick="appData.dailyFocus.splice(${i},1); saveData(); openModal('dailyFocus')">🗑</button>
-                </div>`).join('')}
-            <button onclick="appData.dailyFocus = []; saveData(); openModal('dailyFocus')">Clear All Tasks</button>`;
+        return `<h2>DAILY FOCUS</h2>` + appData.dailyFocus.map((t,i)=>`
+            <div class="task-item ${t.isCompiling?'compiling':''}">
+                <input type="checkbox" ${t.completed?'checked':''} onchange="appData.dailyFocus[${i}].completed=!appData.dailyFocus[${i}].completed; saveData(); openModal('dailyFocus')">
+                <span style="flex:1; ${t.completed?'text-decoration:line-through; opacity:0.5':''}">${t.text}</span>
+                <button class="delete-btn" onclick="appData.dailyFocus.splice(${i},1); saveData(); openModal('dailyFocus')">🗑</button>
+            </div>`).join('') + `<button onclick="appData.dailyFocus=[]; saveData(); openModal('dailyFocus')">Clear All</button>`;
     }
 
     function renderBank() {
-        const sections = [ {title:"Chores", key:"chores"}, {title:"Work", key:"work"}, {title:"Clients", key:"clients"} ];
-        return `<h2>The Armory</h2>
-            ${sections.map(sec => `
-                <h3 style="color:var(--neon-blue); font-size:0.8rem; margin-top:20px;">${sec.title}</h3>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                    ${appData.taskBank[sec.key].map(task => `
-                        <button onclick="appData.dailyFocus.push({text:'${task}',completed:false}); saveData();">➕ ${task}</button>
-                    `).join('')}
-                </div>
-            `).join('')}`;
+        return `<h2>ARMORY</h2>` + Object.entries(appData.taskBank).map(([key, list]) => `
+            <h3 style="color:var(--neon-blue)">${key.toUpperCase()}</h3>
+            <div class="node-grid">${list.map(t => `<button onclick="injectToDaily('${t}')">➕ ${t}</button>`).join('')}</div>
+        `).join('');
     }
 
     function renderWeekly() {
-        return `<h2>7-Day Protocol</h2>
-            ${Object.entries(appData.weeklyPlanner).map(([day, data]) => `
-                <div class="day-box">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong style="color:var(--neon-blue)">${day}</strong>
-                        <small>${data.length}</small>
-                    </div>
-                    <div style="margin:5px 0;">🎯 ${data.mission}</div>
-                    <input type="text" value="${data.userInput}" placeholder="Phase / Targets..." 
-                           style="width:100%; background:transparent; border:none; border-bottom:1px solid #333; color:white; font-size:0.8rem;"
-                           onchange="appData.weeklyPlanner['${day}'].userInput = this.value; saveData();">
-                    <button style="margin-top:10px;" onclick="appData.dailyFocus.push({text:'${data.mission}',completed:false}); saveData();">Inject Mission</button>
-                </div>
-            `).join('')}`;
+        return `<h2>7-DAY PROTOCOL</h2>` + Object.entries(appData.weeklyPlanner).map(([day, d]) => `
+            <div style="border-left: 2px solid var(--neon-blue); padding:10px; margin-bottom:10px; background:rgba(0,217,255,0.05)">
+                <strong>${day}</strong>: ${d.mission} <br>
+                <button onclick="injectToDaily('${d.mission}')">Inject Mission</button>
+            </div>`).join('');
     }
 
     function renderStudyBank() {
-        return `<h2>Study Tracks</h2>
-            ${Object.entries(appData.study).map(([key, data]) => `
-                <div class="task-item" onclick="window.open('${data.url}', '_blank')">
-                    <span style="flex:1">${data.name}</span>
-                    <small>🔗 Portal</small>
-                </div>
-            `).join('')}`;
+        return `<h2>STUDY</h2>` + Object.entries(appData.study).map(([k, d]) => `<div class="task-item" onclick="window.open('${d.url}')">${d.name} 🔗</div>`).join('');
     }
 
     function renderWorkout() {
-        return `<h2>Health</h2>
-            ${appData.workout.dailyroutine.map((ex,i)=>`
-                <div class="task-item">
-                    <input type="checkbox" ${ex.completed?'checked':''} onchange="appData.workout.dailyroutine[${i}].completed=!appData.workout.dailyroutine[${i}].completed; saveData();">
-                    <span style="flex:1">${ex.name}</span>
-                    <button class="delete-btn" onclick="appData.workout.dailyroutine.splice(${i},1); saveData(); openModal('workout')">🗑</button>
-                </div>`).join('')}
-            <div style="display:flex; gap:5px; margin-top:10px;">
-                <input type="text" id="newEx" placeholder="Add exercise..." style="flex:1">
-                <button onclick="const v=document.getElementById('newEx').value; if(v){appData.workout.dailyroutine.push({name:v,completed:false}); saveData(); openModal('workout')}">Add</button>
-            </div>
-            <hr style="border-color:#222; margin:20px 0;">
-            <h3>Hydration: ${appData.workout.waterIntake}L</h3>
-            <button onclick="appData.workout.waterIntake += 0.5; saveData(); openModal('workout')">+ 0.5L</button>
-            <button onclick="appData.workout.waterIntake = 0; saveData(); openModal('workout')">Reset</button>`;
+        return `<h2>HEALTH</h2>
+            <h3>Water: ${appData.workout.waterIntake}L</h3>
+            <button onclick="appData.workout.waterIntake+=0.5; saveData(); openModal('workout')">+0.5L</button>
+            <button onclick="appData.workout.waterIntake=0; saveData(); openModal('workout')">Reset</button>`;
     }
 
     function renderSubBank() {
-        return `<h2>Sub Nodes</h2>
-            <div class="node-grid">
-                ${appData.subscriptions.map(s => `
-                    <div class="card" onclick="window.open('${s.url}', '_blank')" style="padding:10px; font-size:0.7rem; text-align:center;">
-                        ${s.name}
-                    </div>
-                `).join('')}
-            </div>`;
+        return `<h2>NODES</h2><div class="node-grid">` + appData.subscriptions.map(s => `<button onclick="window.open('${s.url}')">${s.name}</button>`).join('') + `</div>`;
     }
 
-    function wipeGrid() {
-        if(confirm("DEREZ ALL DATA? This will reset the Grid.")) {
-            localStorage.removeItem('tron_grid_v5');
-            location.reload();
-        }
-    }
+    function wipeGrid() { if(confirm("DEREZ GRID?")) { localStorage.removeItem('tron_grid_v6'); location.reload(); } }
 
     init();
 </script>
