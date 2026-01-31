@@ -247,5 +247,11 @@
 
     init();
 </script>
+    <div id="modal-overlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-[2000] flex items-center justify-center p-6">
+        <div id="modal-content" class="cyber-card w-full max-w-2xl p-8 relative">
+            <button onclick="window.closeModal()" class="absolute top-4 right-4 text-cyan-400 hover:text-white orbitron text-xs">CLOSE [X]</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
 </body>
 </html>
